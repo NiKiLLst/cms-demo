@@ -25,9 +25,10 @@ apps/nextjs-demo/.next/
 # PocketBase local data
 apps/pocketbase/pb_data/
 
-# Cloudflared credentials (never commit tunnel JSON)
-infra/cloudflared/*.json
+# Cloudflared credentials (never commit tunnel secrets, tokens, or configs)
+infra/cloudflared/*
 !infra/cloudflared/*.example.*
+!infra/cloudflared/.gitkeep
 
 # Logs / Docker
 *.log
