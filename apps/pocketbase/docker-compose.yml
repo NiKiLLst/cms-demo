@@ -1,0 +1,14 @@
+services:
+  pocketbase:
+    build: .
+    volumes:
+      - pocketbase_data:/pb/pb_data
+      - pocketbase_hooks:/pb/pb_hooks
+      - pocketbase_migrations:/pb/pb_migrations
+    expose:
+      - "8090"
+
+volumes:
+  pocketbase_data:
+  pocketbase_hooks:
+  pocketbase_migrations:

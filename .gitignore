@@ -1,0 +1,48 @@
+# Real env files (secrets live in Coolify panel, not here)
+.env
+.env.local
+.env.*.local
+
+# Node generated codebases
+node_modules/
+dist/
+build/
+.next/
+.cache/
+.turbo/
+.parcel-cache/
+
+# Strapi
+apps/strapi/.tmp/
+apps/strapi/.cache/
+apps/strapi/build/
+apps/strapi/public/uploads/
+
+# PayloadCMS / Next.js
+apps/payloadcms/.next/
+apps/nextjs-demo/.next/
+
+# PocketBase local data
+apps/pocketbase/pb_data/
+
+# Cloudflared credentials (never commit tunnel JSON)
+infra/cloudflared/*.json
+!infra/cloudflared/*.example.*
+
+# Logs / Docker
+*.log
+.docker/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Claude Code session settings
+.claude/settings.local.json

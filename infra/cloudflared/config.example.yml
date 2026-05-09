@@ -1,0 +1,25 @@
+# Sample cloudflared tunnel config.
+# Copy to /etc/cloudflared/config.yml on the VM, replace <YOUR_TUNNEL_UUID>,
+# and place the credentials JSON next to it. Each ingress rule maps a public
+# hostname to Coolify's internal Traefik (which listens on the VM's :80 and
+# routes by Host header to the right container).
+
+tunnel: <YOUR_TUNNEL_UUID>
+credentials-file: /etc/cloudflared/<YOUR_TUNNEL_UUID>.json
+
+ingress:
+  - hostname: strapi.example.com
+    service: http://localhost:80
+  - hostname: directus.example.com
+    service: http://localhost:80
+  - hostname: ghost.example.com
+    service: http://localhost:80
+  - hostname: pocketbase.example.com
+    service: http://localhost:80
+  - hostname: appwrite.example.com
+    service: http://localhost:80
+  - hostname: payload.example.com
+    service: http://localhost:80
+  - hostname: next.example.com
+    service: http://localhost:80
+  - service: http_status:404
