@@ -93,7 +93,8 @@ cmss:
       PAYLOAD_SECRET: "{{secret_pin:PAYLOAD_SECRET|hex:32}}"
       DB_DATABASE:    payload
       DB_USER:        payload
-      DB_PASSWORD:    "{{secret_pin:DB_PASSWORD}}"
+      # hex (not base64) so the value is URL-safe inside DATABASE_URI.
+      DB_PASSWORD:    "{{secret_pin:DB_PASSWORD|hex:24}}"
       DATABASE_URI:   "postgres://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_DATABASE}"
       NODE_ENV:       production
 
