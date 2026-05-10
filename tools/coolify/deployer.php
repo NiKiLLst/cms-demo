@@ -80,9 +80,10 @@ try {
 // ----- Pre-fetch existing secret_pin values for this resource -----
 $envSync = new EnvSync($strategy->resourceableType(), $resource->id);
 $existingPins = $envSync->loadExistingPins();
+$existingEnv = $envSync->loadExistingEnv();   // adoption fallback for pre-framework deploys.
 
-// ----- Resolve placeholders against existing pins -----
-$resolver = new PlaceholderResolver($existingPins);
+// ----- Resolve placeholders against existing pins (with env-var adoption fallback) -----
+$resolver = new PlaceholderResolver($existingPins, $existingEnv);
 try {
     $resolvedEnv = $resolver->resolveAll($descriptor['env'] ?? []);
 } catch (\Throwable $e) {

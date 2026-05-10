@@ -30,16 +30,27 @@ declare(strict_types=1);
  */
 final class PlaceholderResolver
 {
-    /** @var array<string,string> LABEL => plain value (pre-existing) */
+    /** @var array<string,string> LABEL => plain value (pre-existing __PIN__ rows) */
     private array $existingPins;
+
+    /** @var array<string,string> ENV_KEY => plain value (all env vars on the resource) */
+    private array $existingEnv;
 
     /** @var array<string,string> LABEL => plain value (newly generated this run) */
     private array $newPins = [];
 
-    /** @param array<string,string> $existingPins */
-    public function __construct(array $existingPins)
+    /**
+     * @param array<string,string> $existingPins LABEL => plain value, from __PIN__ rows
+     * @param array<string,string> $existingEnv  ENV_KEY => plain value, all env vars on
+     *                                           the resource. Used as fallback so a CMS
+     *                                           previously deployed without the framework
+     *                                           "adopts" its existing secret values into
+     *                                           pins on first framework run.
+     */
+    public function __construct(array $existingPins, array $existingEnv = [])
     {
         $this->existingPins = $existingPins;
+        $this->existingEnv = $existingEnv;
     }
 
     /**
@@ -114,7 +125,16 @@ final class PlaceholderResolver
             if (array_key_exists($label, $this->existingPins)) {
                 return $this->existingPins[$label];
             }
-            // Otherwise generate per spec.
+            // Adoption fallback: if a CMS was deployed pre-framework, the env var
+            // already exists in Coolify with `key == LABEL`. Adopt that value as the
+            // pin instead of rotating it (which would invalidate DB encryption keys,
+            // session secrets, DB role passwords, etc.).
+            if (array_key_exists($label, $this->existingEnv)) {
+                $adopted = $this->existingEnv[$label];
+                $this->newPins[$label] = $adopted;   // persist as __PIN__<label> next run.
+                return $adopted;
+            }
+            // No existing value anywhere — generate per spec.
             $spec = $rest[0] ?? 'b64:24';
             $value = $this->generateBySpec($spec);
             $this->newPins[$label] = $value;

@@ -26,9 +26,13 @@ done
 HERE="$(cd "$(dirname "$0")" && pwd)"
 
 # ---------- Mirror tools/ into coolify container ----------
-sudo docker exec coolify rm -rf /tmp/cms-deploy
-sudo docker exec coolify mkdir -p /tmp/cms-deploy
+# The coolify container runs as UID 9999, so docker exec without -u 0 can't remove
+# files dropped by docker cp (root-owned). Run cleanup as root.
+sudo docker exec -u 0 coolify rm -rf /tmp/cms-deploy
+sudo docker exec -u 0 coolify mkdir -p /tmp/cms-deploy
 sudo docker cp "$HERE/." coolify:/tmp/cms-deploy/
+# Make the dropped files readable by the coolify user (which runs the deployer).
+sudo docker exec -u 0 coolify chmod -R a+rX /tmp/cms-deploy
 
 # ---------- Run deployer (under tinker so Laravel is bootstrapped) ----------
 echo "[deploy.sh] running deployer for $CMS_KEY ..." >&2

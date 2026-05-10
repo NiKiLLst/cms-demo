@@ -48,11 +48,27 @@ $RemoteDir  = '/tmp/cms-deploy'
 
 function Sync-Tools {
     Write-Host "[deploy.ps1] streaming tools/ to $VmTarget`:$RemoteDir ..."
-    ssh -J $JumpHost $VmTarget "rm -rf $RemoteDir && mkdir -p $RemoteDir" | Out-Null
-    if ($LASTEXITCODE -ne 0) { throw "remote prep failed (exit $LASTEXITCODE)" }
-    # tar-over-ssh — Windows 10+ ships bsdtar.
-    & tar c -C $ToolsDir . | ssh -J $JumpHost $VmTarget "tar x -C $RemoteDir"
-    if ($LASTEXITCODE -ne 0) { throw "tar pipe failed (exit $LASTEXITCODE)" }
+    $localTar = Join-Path $env:TEMP "cms-tools-$PID.tar"
+    # Use the Windows-bundled bsdtar explicitly (MSYS / Git-Bash ship a different
+    # tar that mangles drive-letter paths like C:\Claude\... as hostnames).
+    $tarExe = Join-Path $env:SystemRoot 'System32\tar.exe'
+    try {
+        & $tarExe c -C $ToolsDir -f $localTar .
+        if ($LASTEXITCODE -ne 0) { throw "local tar failed (exit $LASTEXITCODE)" }
+
+        ssh -J $JumpHost $VmTarget "rm -rf $RemoteDir && mkdir -p $RemoteDir" | Out-Null
+        if ($LASTEXITCODE -ne 0) { throw "remote prep failed (exit $LASTEXITCODE)" }
+
+        # scp -J works on OpenSSH 8+. The -O flag forces legacy scp mode (avoids
+        # sftp's chmod weirdness on read-only working copies).
+        scp -O -J $JumpHost $localTar "${VmTarget}:${RemoteDir}/_tools.tar"
+        if ($LASTEXITCODE -ne 0) { throw "scp upload failed (exit $LASTEXITCODE)" }
+
+        ssh -J $JumpHost $VmTarget "tar x -C $RemoteDir -f $RemoteDir/_tools.tar && rm $RemoteDir/_tools.tar"
+        if ($LASTEXITCODE -ne 0) { throw "remote extract failed (exit $LASTEXITCODE)" }
+    } finally {
+        if (Test-Path $localTar) { Remove-Item -Force $localTar }
+    }
 }
 
 function Invoke-Deploy([string]$cmsKey) {

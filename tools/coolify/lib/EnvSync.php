@@ -69,6 +69,29 @@ final class EnvSync
         return $out;
     }
 
+    /**
+     * Read back every env var (excluding __PIN__ rows) for this resource. Used by
+     * the resolver as an adoption fallback so a CMS that was deployed before the
+     * framework existed can have its current secrets adopted into pins on first
+     * framework run, instead of being rotated.
+     *
+     * @return array<string,string> KEY => plain value
+     */
+    public function loadExistingEnv(): array
+    {
+        $rows = EnvironmentVariable::query()
+            ->where('resourceable_type', $this->resourceableType)
+            ->where('resourceable_id', $this->resourceableId)
+            ->where('key', 'not like', self::PIN_KEY_PREFIX . '%')
+            ->get(['key', 'value']);
+
+        $out = [];
+        foreach ($rows as $row) {
+            $out[$row->key] = $row->value;
+        }
+        return $out;
+    }
+
     private function upsertOne(string $key, string $value, bool $isPin): void
     {
         /** @var EnvironmentVariable|null $existing */
