@@ -34,6 +34,10 @@ sudo docker cp "$HERE/." coolify:/tmp/cms-deploy/
 # Make the dropped files readable by the coolify user (which runs the deployer).
 sudo docker exec -u 0 coolify chmod -R a+rX /tmp/cms-deploy
 
+# PHP OPcache caches the framework files on first load — when we update them and
+# rerun, the old bytecode is reused unless we invalidate. Reset before each run.
+sudo docker exec coolify php -r "if (function_exists('opcache_reset')) opcache_reset();"
+
 # ---------- Run deployer (under tinker so Laravel is bootstrapped) ----------
 echo "[deploy.sh] running deployer for $CMS_KEY ..." >&2
 FORCE_VAL="0"
