@@ -12,10 +12,9 @@ WORKDIR /app
 # Install dependencies based on the preferred package manager
 COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
 RUN \
-  if [ -f yarn.lock ]; then yarn --frozen-lockfile --production=false; \
-  elif [ -f package-lock.json ]; then npm ci --include=dev; \
-  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i --frozen-lockfile; \
-  else npm install --include=dev --no-audit --no-fund; \
+  if [ -f yarn.lock ]; then yarn --production=false; \
+  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i; \
+  else npm install --include=dev --legacy-peer-deps --no-audit --no-fund; \
   fi
 
 

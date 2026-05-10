@@ -46,6 +46,10 @@ final class DockerComposeStrategy implements DeployStrategyInterface
             'docker_compose_location'  => $descriptor['docker_compose_location'],
             'docker_compose_domains'   => json_encode($descriptor['docker_compose_domains']),
             'fqdn'                     => $descriptor['fqdn'],
+            // ports_exposes is NOT NULL on applications; Coolify ignores it for
+            // dockercompose at runtime (it parses the compose's expose: blocks
+            // instead) but the column still needs a value at insert time.
+            'ports_exposes'            => (string) ($descriptor['ports_exposes'] ?? '3000'),
             // Force Coolify to reparse the compose on next deploy so any changes in
             // the .yml on the repo (newly added env, new ports, etc.) are picked up.
             'docker_compose'           => null,
