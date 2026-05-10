@@ -44,7 +44,9 @@ final class DockerComposeStrategy implements DeployStrategyInterface
             'build_pack'               => 'dockercompose',
             'base_directory'           => $baseDir,
             'docker_compose_location'  => $descriptor['docker_compose_location'],
-            'docker_compose_domains'   => json_encode($descriptor['docker_compose_domains']),
+            // Coolify expects {"<service>":{"domain":"http://..."}} — manifest gives the
+            // flatter {"<service>":"http://..."} for ergonomics; lift it here.
+            'docker_compose_domains'   => json_encode(self::wrapDomains($descriptor['docker_compose_domains'])),
             'fqdn'                     => $descriptor['fqdn'],
             // ports_exposes is NOT NULL on applications; Coolify ignores it for
             // dockercompose at runtime (it parses the compose's expose: blocks
@@ -96,5 +98,26 @@ final class DockerComposeStrategy implements DeployStrategyInterface
     public function resourceableType(): string
     {
         return Application::class;
+    }
+
+    /**
+     * Lift a flat {service: domain-string} map into Coolify's expected
+     * {service: {domain: domain-string}} shape, while leaving values that are
+     * already correctly shaped untouched.
+     *
+     * @param array<string,mixed> $domains
+     * @return array<string,array{domain:string}>
+     */
+    private static function wrapDomains(array $domains): array
+    {
+        $out = [];
+        foreach ($domains as $service => $value) {
+            if (is_array($value) && isset($value['domain'])) {
+                $out[$service] = $value;
+            } else {
+                $out[$service] = ['domain' => (string) $value];
+            }
+        }
+        return $out;
     }
 }
