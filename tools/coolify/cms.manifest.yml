@@ -29,7 +29,8 @@ cmss:
     fqdn: http://directus.nerdass.org
     docker_compose_location: /docker-compose.yml
     docker_compose_domains:
-      directus: http://directus.nerdass.org
+      directus:
+        domain: http://directus.nerdass.org
     env:
       KEY:            "{{secret_pin:KEY|uuid}}"
       SECRET:         "{{secret_pin:SECRET}}"
@@ -45,7 +46,8 @@ cmss:
     fqdn: http://ghost.nerdass.org
     docker_compose_location: /docker-compose.yml
     docker_compose_domains:
-      ghost: http://ghost.nerdass.org
+      ghost:
+        domain: http://ghost.nerdass.org
     env:
       GHOST_URL:           http://ghost.nerdass.org
       MYSQL_ROOT_PASSWORD: "{{secret_pin:MYSQL_ROOT_PASSWORD}}"
@@ -58,7 +60,8 @@ cmss:
     fqdn: http://pocketbase.nerdass.org
     docker_compose_location: /docker-compose.yml
     docker_compose_domains:
-      pocketbase: http://pocketbase.nerdass.org
+      pocketbase:
+        domain: http://pocketbase.nerdass.org
     env: {}                      # PocketBase has no compose env
 
   strapi:
@@ -84,7 +87,8 @@ cmss:
     fqdn: http://payload.nerdass.org
     docker_compose_location: /docker-compose.yml
     docker_compose_domains:
-      payload: http://payload.nerdass.org
+      payload:
+        domain: http://payload.nerdass.org
     env:
       PAYLOAD_SECRET: "{{secret_pin:PAYLOAD_SECRET|hex:32}}"
       DB_DATABASE:    payload
