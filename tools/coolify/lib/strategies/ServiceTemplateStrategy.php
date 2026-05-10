@@ -29,9 +29,10 @@ final class ServiceTemplateStrategy implements DeployStrategyInterface
         $existing = Service::query()->where('name', $displayName)->first();
 
         if ($existing) {
-            $existing->fqdn = $descriptor['fqdn'];
+            // Note: services table has no fqdn column — sub-applications carry it.
             $existing = stripAppendedAttributes($existing);
             $existing->save();
+            $this->setFqdnOnPrimarySubApp($existing, $descriptor);
             return $existing;
         }
 
@@ -56,7 +57,6 @@ final class ServiceTemplateStrategy implements DeployStrategyInterface
         $svc->destination_id = $defaults['destination_id'];
         $svc->server_id = $defaults['server_id'];
         $svc->service_type = $key;
-        $svc->fqdn = $descriptor['fqdn'];
         $svc = stripAppendedAttributes($svc);
         $svc->save();
 
@@ -65,7 +65,34 @@ final class ServiceTemplateStrategy implements DeployStrategyInterface
         // EnvSync afterwards).
         $svc->parse(isNew: true);
 
+        // Set fqdn on the primary sub-application (e.g. for Appwrite, the
+        // `appwrite` ServiceApplication row).
+        $this->setFqdnOnPrimarySubApp($svc, $descriptor);
+
         return $svc;
+    }
+
+    /**
+     * Coolify stores the public hostname on a ServiceApplication row inside the
+     * Service (one row per compose service). The "primary" one is named after the
+     * template key (e.g. `appwrite` for the Appwrite stack). Fall back to the
+     * first ServiceApplication if the named one is absent.
+     */
+    private function setFqdnOnPrimarySubApp(Service $svc, array $descriptor): void
+    {
+        if (empty($descriptor['fqdn']) || !method_exists($svc, 'applications')) {
+            return;
+        }
+        /** @var \Illuminate\Database\Eloquent\Collection $apps */
+        $apps = $svc->applications()->get();
+        if ($apps->isEmpty()) {
+            return;
+        }
+        $primary = $apps->firstWhere('name', $descriptor['template']) ?? $apps->first();
+        if ($primary->fqdn !== $descriptor['fqdn']) {
+            $primary->fqdn = $descriptor['fqdn'];
+            $primary->save();
+        }
     }
 
     public function deploy(object $resource, bool $forceRebuild): string
