@@ -30,9 +30,14 @@ sudo docker exec coolify rm -rf /tmp/cms-deploy
 sudo docker exec coolify mkdir -p /tmp/cms-deploy
 sudo docker cp "$HERE/." coolify:/tmp/cms-deploy/
 
-# ---------- Run deployer ----------
+# ---------- Run deployer (under tinker so Laravel is bootstrapped) ----------
 echo "[deploy.sh] running deployer for $CMS_KEY ..." >&2
-RESULT_JSON="$(sudo docker exec coolify php /tmp/cms-deploy/deployer.php "$CMS_KEY" $FORCE)"
+FORCE_VAL="0"
+[ -n "$FORCE" ] && FORCE_VAL="1"
+RESULT_JSON="$(sudo docker exec -e CMS_KEY="$CMS_KEY" -e FORCE="$FORCE_VAL" coolify \
+    php artisan tinker --execute="require '/tmp/cms-deploy/deployer.php';")"
+# Extract last non-empty line as the JSON payload (tinker may prefix with warnings).
+RESULT_JSON="$(echo "$RESULT_JSON" | grep -E '^\{.*\}$' | tail -1)"
 echo "$RESULT_JSON"
 
 OK=$(echo "$RESULT_JSON" | python3 -c "import sys,json;print(json.load(sys.stdin).get('ok'))" 2>/dev/null || echo "false")

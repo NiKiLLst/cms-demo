@@ -30,20 +30,18 @@ function fail(string $message, int $code = 1): never
     exit($code);
 }
 
-// ----- CLI args -----
-$argvCopy = $argv;
-array_shift($argvCopy);                                 // drop script path
-$forceRebuild = false;
-$cmsKey = null;
-foreach ($argvCopy as $arg) {
-    if ($arg === '--force' || $arg === '--force-rebuild') {
-        $forceRebuild = true;
-    } else {
-        $cmsKey = $arg;
-    }
+// ----- Args (passed via env vars because we run under `php artisan tinker
+// --execute`, which doesn't forward extra CLI args). -----
+$cmsKey = getenv('CMS_KEY') ?: ($argv[1] ?? null);
+$forceRebuild = (getenv('FORCE') === '1') || in_array('--force', $argv ?? [], true)
+    || in_array('--force-rebuild', $argv ?? [], true);
+if (!$cmsKey) {
+    fail("missing CMS_KEY env var (or first CLI arg)");
 }
-if ($cmsKey === null) {
-    fail("usage: php deployer.php <cms_key> [--force]");
+
+// ----- Sanity check Laravel bootstrap (we depend on it for Eloquent + Yaml). -----
+if (!class_exists(\App\Models\Application::class)) {
+    fail("Laravel app not bootstrapped — run me via `php artisan tinker --execute=\"require ...\"` inside the coolify container");
 }
 
 // ----- Load manifest -----
