@@ -94,35 +94,33 @@ final class EnvSync
 
     private function upsertOne(string $key, string $value, bool $isPin): void
     {
-        /** @var EnvironmentVariable|null $existing */
-        $existing = EnvironmentVariable::query()
-            ->where('resourceable_type', $this->resourceableType)
-            ->where('resourceable_id', $this->resourceableId)
-            ->where('key', $key)
-            ->first();
+        // Delete-then-insert under a transaction. Eloquent's "find existing then
+        // update or create" pattern was creating duplicate rows in some cases
+        // (Coolify model observer or boot hook somewhere — couldn't pin it down),
+        // and there's no UNIQUE constraint on (resourceable_type, resourceable_id,
+        // key) to lean on. Hard delete first and we sleep at night.
+        \Illuminate\Support\Facades\DB::transaction(function () use ($key, $value, $isPin) {
+            EnvironmentVariable::query()
+                ->where('resourceable_type', $this->resourceableType)
+                ->where('resourceable_id', $this->resourceableId)
+                ->where('key', $key)
+                ->delete();
 
-        if ($existing) {
-            if ($existing->value !== $value) {
-                $existing->value = $value;
-                $existing->save();
-            }
-            return;
-        }
-
-        EnvironmentVariable::query()->create([
-            'resourceable_type' => $this->resourceableType,
-            'resourceable_id'   => $this->resourceableId,
-            'key'               => $key,
-            'value'             => $value,
-            'uuid'              => (string) Str::uuid(),
-            'is_runtime'        => !$isPin,
-            'is_buildtime'      => !$isPin,
-            'is_shared'         => false,
-            'is_preview'        => false,
-            'is_shown_once'     => false,
-            'is_multiline'      => false,
-            'is_literal'        => false,
-            'is_required'       => false,
-        ]);
+            EnvironmentVariable::query()->create([
+                'resourceable_type' => $this->resourceableType,
+                'resourceable_id'   => $this->resourceableId,
+                'key'               => $key,
+                'value'             => $value,
+                'uuid'              => (string) Str::uuid(),
+                'is_runtime'        => !$isPin,
+                'is_buildtime'      => !$isPin,
+                'is_shared'         => false,
+                'is_preview'        => false,
+                'is_shown_once'     => false,
+                'is_multiline'      => false,
+                'is_literal'        => false,
+                'is_required'       => false,
+            ]);
+        });
     }
 }
