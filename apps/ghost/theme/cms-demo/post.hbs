@@ -8,9 +8,19 @@
         {{#if primary_author}} · {{primary_author.name}}{{/if}}
     </p>
     {{#if feature_image}}
-        <img src="{{feature_image}}" alt="" />
+        <figure class="post-feature-image">
+            <img src="{{feature_image}}" alt="{{title}}" />
+            {{#if feature_image_caption}}
+                <figcaption>{{{feature_image_caption}}}</figcaption>
+            {{/if}}
+        </figure>
     {{/if}}
     <div class="post-body">
         {{content}}
     </div>
+    {{!-- Member access gate / paywall placeholder. Ghost expects themes to handle
+         locked content even if the site doesn't sell memberships. --}}
+    {{#unless access}}
+        <p class="muted">Questo contenuto è riservato ai membri. <a href="#/portal/signup">Iscriviti</a> per leggerlo.</p>
+    {{/unless}}
 </article>

@@ -70,3 +70,16 @@ img { max-width: 100%; height: auto; border-radius: 6px; }
   color: var(--muted);
   font-size: 0.85rem;
 }
+
+/* Koenig editor card sizes — required by GScan for Ghost 5 themes. */
+.kg-width-wide  { width: 100%; max-width: 1040px; margin-left: auto; margin-right: auto; }
+.kg-width-full  { width: 100vw; max-width: none; margin-left: calc(50% - 50vw); margin-right: calc(50% - 50vw); }
+.kg-image       { display: block; max-width: 100%; height: auto; margin: 1.5rem auto; }
+.kg-image-card  { margin: 1.5rem 0; }
+.kg-embed-card  { margin: 1.5rem 0; }
+.kg-bookmark-card { margin: 1.5rem 0; }
+.kg-gallery-container { max-width: 1040px; margin: 1.5rem auto; }
+.kg-gallery-row  { display: flex; gap: 0.5rem; }
+.kg-gallery-image img { width: 100%; height: auto; display: block; }
+.kg-callout-card { padding: 1rem; border-radius: 6px; background: #f3f4f6; margin: 1.5rem 0; }
+.kg-toggle-card  { padding: 1rem; border: 1px solid var(--border); border-radius: 6px; margin: 1.5rem 0; }

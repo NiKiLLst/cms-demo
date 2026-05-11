@@ -7,7 +7,7 @@
     "ghost-api": "v5"
   },
   "license": "MIT",
-  "author": { "name": "cms-demo" },
+  "author": { "name": "cms-demo", "email": "filippo.ferretti@gmail.com" },
   "config": {
     "posts_per_page": 25,
     "image_sizes": {
