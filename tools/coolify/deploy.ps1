@@ -56,23 +56,30 @@ function Sync-Tools {
     # The VM resolves DNS only via 10.10.101.2 (no public fallback) and that resolver
     # has intermittent timeouts on outbound names like github.com. Retry inline x5 so
     # a single DNS hiccup doesn't kill the sync.
+    # PowerShell double-quoted here-strings interpolate `$var`, so any bash $var
+    # must be backtick-escaped (`` `$ ``) or chained through `&&`. We chain the
+    # `git reset --hard` into the success path of `git fetch` to avoid needing
+    # an `ok=1` shell variable at all.
     $cmd = @"
-ok=0
+synced=no
 if [ ! -d $remoteRepo/.git ]; then
   sudo mkdir -p $remoteRepo && sudo chown debian:debian $remoteRepo
   for i in 1 2 3 4 5; do
-    git clone --depth 1 $repoUrl $remoteRepo 2>&1 && ok=1 && break
-    echo "git clone retry \$i" >&2; sleep 5
+    git clone --depth 1 $repoUrl $remoteRepo 2>&1 && synced=yes && break
+    echo "git clone retry `$i" >&2; sleep 5
   done
 else
   cd $remoteRepo
   for i in 1 2 3 4 5; do
-    git fetch --depth 1 origin main 2>&1 && ok=1 && break
-    echo "git fetch retry \$i" >&2; sleep 5
+    git fetch --depth 1 origin main 2>&1 \
+      && git reset --hard origin/main \
+      && synced=yes && break
+    echo "git fetch retry `$i" >&2; sleep 5
   done
-  [ \$ok -eq 1 ] && git reset --hard origin/main
 fi
-[ \$ok -eq 0 ] && echo "git sync exhausted retries; continuing with last known repo state" >&2
+if [ "`$synced" != "yes" ]; then
+  echo "git sync exhausted retries; continuing with last known repo state" >&2
+fi
 rm -rf $RemoteDir && mkdir -p $RemoteDir
 cp -r $remoteRepo/tools/coolify/. $RemoteDir/
 "@
