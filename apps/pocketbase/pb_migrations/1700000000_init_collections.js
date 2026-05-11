@@ -4,7 +4,7 @@
 // Re-running deploy won't double-create. Down rolls back the three collections.
 
 migrate(
-  (app) => {
+  (db) => {
     // ---- blog_post --------------------------------------------------------
     const blogPost = new Collection({
       name: "blog_post",
@@ -24,7 +24,7 @@ migrate(
         { name: "author",       type: "text" },
       ],
     });
-    app.dao().saveCollection(blogPost);
+    new Dao(db).saveCollection(blogPost);
 
     // ---- portfolio_item ---------------------------------------------------
     const portfolio = new Collection({
@@ -44,7 +44,7 @@ migrate(
         { name: "tags",         type: "json" },
       ],
     });
-    app.dao().saveCollection(portfolio);
+    new Dao(db).saveCollection(portfolio);
 
     // ---- booking ----------------------------------------------------------
     const booking = new Collection({
@@ -63,13 +63,14 @@ migrate(
         { name: "status",   type: "select", values: ["new", "confirmed", "cancelled"] },
       ],
     });
-    app.dao().saveCollection(booking);
+    new Dao(db).saveCollection(booking);
   },
-  (app) => {
+  (db) => {
     for (const name of ["blog_post", "portfolio_item", "booking"]) {
       try {
-        const c = app.dao().findCollectionByNameOrId(name);
-        app.dao().deleteCollection(c);
+        const dao = new Dao(db);
+        const c = dao.findCollectionByNameOrId(name);
+        dao.deleteCollection(c);
       } catch (_) {
         // collection doesn't exist — nothing to roll back
       }
