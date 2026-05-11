@@ -50,10 +50,11 @@ cmss:
     dockerfile_location: /Dockerfile
     ports_exposes: "3000"
     env:
-      PORT:     "3000"
-      NODE_ENV: production
-      CMS_URL:  http://directus-admin.nerdass.org
-      CMS_NAME: Directus
+      PORT:      "3000"
+      NODE_ENV:  production
+      CMS_URL:   http://directus-admin.nerdass.org
+      CMS_NAME:  Directus
+      ADMIN_URL: http://directus-admin.nerdass.org
 
   ghost:
     type: dockercompose
@@ -86,10 +87,11 @@ cmss:
     dockerfile_location: /Dockerfile
     ports_exposes: "3000"
     env:
-      PORT:     "3000"
-      NODE_ENV: production
-      CMS_URL:  http://pocketbase-admin.nerdass.org
-      CMS_NAME: PocketBase
+      PORT:      "3000"
+      NODE_ENV:  production
+      CMS_URL:   http://pocketbase-admin.nerdass.org
+      CMS_NAME:  PocketBase
+      ADMIN_URL: http://pocketbase-admin.nerdass.org/_/
 
   # Strapi admin/API — moved off strapi.nerdass.org so that subdomain can serve
   # the public Next.js frontend (resource `strapi-frontend` below).
@@ -117,10 +119,11 @@ cmss:
     dockerfile_location: /Dockerfile
     ports_exposes: "3000"
     env:
-      PORT:     "3000"
-      NODE_ENV: production
-      CMS_URL:  http://strapi-admin.nerdass.org
-      CMS_NAME: Strapi
+      PORT:      "3000"
+      NODE_ENV:  production
+      CMS_URL:   http://strapi-admin.nerdass.org
+      CMS_NAME:  Strapi
+      ADMIN_URL: http://strapi-admin.nerdass.org/admin
 
   payloadcms:
     type: dockercompose
@@ -163,6 +166,7 @@ cmss:
       APPWRITE_PROJECT_ID:    cms-demo
       APPWRITE_DATABASE_ID:   main
       CMS_NAME:               Appwrite
+      ADMIN_URL:              http://appwrite.nerdass.org/console
 
   appwrite:
     type: service-template

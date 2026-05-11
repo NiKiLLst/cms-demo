@@ -36,6 +36,14 @@ nav {
 }
 nav .brand { font-weight: 600; margin-right: auto; }
 nav a { color: var(--fg); }
+nav .admin-link {
+  background: var(--accent);
+  color: white;
+  padding: 0.3rem 0.7rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+nav .admin-link:hover { filter: brightness(0.95); text-decoration: none; }
 
 h1 { font-size: 1.75rem; margin: 0 0 1rem; }
 h2 { font-size: 1.25rem; margin: 1.5rem 0 0.5rem; }

@@ -14,7 +14,8 @@ export default function HomePage() {
         <li><Link href="/portfolio">Portfolio</Link> — lavori e progetti</li>
         <li><Link href="/prenotazioni">Prenotazioni</Link> — form pubblico, le richieste atterrano nell&apos;admin</li>
       </ul>
-      <p><a href="/admin">→ Admin panel</a></p>
+      <h2>Admin</h2>
+      <p><a href="/admin">→ Pannello admin di PayloadCMS</a></p>
     </div>
   )
 }

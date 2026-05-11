@@ -35,7 +35,15 @@ a:hover { text-decoration: underline; }
 .site-nav .brand { font-weight: 600; margin-right: auto; }
 .site-nav .brand a { color: var(--fg); }
 .site-nav a { color: var(--fg); }
-.site-nav .admin-link { margin-left: auto; color: var(--accent); }
+.site-nav .admin-link {
+  margin-left: auto;
+  background: var(--accent);
+  color: white;
+  padding: 0.3rem 0.7rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+.site-nav .admin-link:hover { filter: brightness(0.95); text-decoration: none; }
 
 .site-main { flex: 1; }
 

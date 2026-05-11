@@ -115,3 +115,4 @@ export async function createBooking(input: BookingInput): Promise<void> {
 }
 
 export const CMS_NAME = process.env.CMS_NAME ?? "Directus";
+export const ADMIN_URL = process.env.ADMIN_URL ?? "http://directus-admin.nerdass.org";

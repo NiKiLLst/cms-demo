@@ -125,3 +125,4 @@ export async function createBooking(input: BookingInput): Promise<void> {
 }
 
 export const CMS_NAME = process.env.CMS_NAME ?? "PocketBase";
+export const ADMIN_URL = process.env.ADMIN_URL ?? "http://pocketbase-admin.nerdass.org/_/";

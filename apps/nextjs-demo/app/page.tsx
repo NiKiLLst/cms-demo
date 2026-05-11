@@ -9,6 +9,14 @@ export default function Home() {
         <Link href="/blog">Blog</Link>
         <Link href="/portfolio">Portfolio</Link>
         <Link href="/prenotazioni">Prenotazioni</Link>
+        <a
+          href="https://github.com/NiKiLLst/cms-demo/tree/main/apps/nextjs-demo/content"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-zinc-900 dark:bg-zinc-100 text-zinc-100 dark:text-zinc-900 px-2 py-1 rounded text-xs"
+        >
+          Admin (git) →
+        </a>
       </nav>
       <main className="max-w-2xl mx-auto px-6 py-12">
         <h1 className="text-3xl font-semibold mb-4">cms-demo · Next.js (CMS-less)</h1>
@@ -23,6 +31,19 @@ export default function Home() {
           <li><Link href="/portfolio" className="underline">Portfolio</Link> — elementi letti da <code>content/portfolio/*.md</code></li>
           <li><Link href="/prenotazioni" className="underline">Prenotazioni</Link> — form pubblico, scrive su <code>/app/data/bookings.json</code></li>
         </ul>
+        <h2 className="text-xl font-semibold mt-8 mb-2">Admin</h2>
+        <p className="text-zinc-600 dark:text-zinc-400">
+          Niente UI admin. &quot;Caricare un articolo&quot; ={" "}
+          <a
+            href="https://github.com/NiKiLLst/cms-demo/tree/main/apps/nextjs-demo/content"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline"
+          >
+            editare i file in <code>content/</code> e fare git push
+          </a>
+          .
+        </p>
         <h2 className="text-xl font-semibold mt-8 mb-2">Risultato di validazione</h2>
         <p className="text-zinc-600 dark:text-zinc-400">
           Senza un CMS, &quot;caricare in autonomia un articolo&quot; significa editare un

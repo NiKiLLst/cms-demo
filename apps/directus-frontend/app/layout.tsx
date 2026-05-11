@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import "./globals.css";
-import { CMS_NAME } from "../lib/cms";
+import { CMS_NAME, ADMIN_URL } from "../lib/cms";
 
 export const metadata: Metadata = {
   title: `cms-demo (${process.env.CMS_NAME ?? "Directus"})`,
@@ -18,6 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Link href="/blog">Blog</Link>
           <Link href="/portfolio">Portfolio</Link>
           <Link href="/prenotazioni">Prenotazioni</Link>
+          <a href={ADMIN_URL} className="admin-link" target="_blank" rel="noopener noreferrer">Admin →</a>
         </nav>
         <main style={{ flex: 1 }}>{children}</main>
         <footer>powered by {CMS_NAME}</footer>
