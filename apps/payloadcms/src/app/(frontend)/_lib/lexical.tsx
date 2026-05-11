@@ -53,7 +53,11 @@ function renderNode(node: Node, key: string): React.ReactNode {
   }
 }
 
-export function RichText({ data }: { data: { root?: { children?: Node[] } } | null | undefined }) {
-  if (!data?.root?.children) return null
-  return <>{renderChildren(data.root.children)}</>
+// Accept `unknown` so call sites don't need narrow type casts that conflict with
+// Payload's generated SerializedEditorState type. We narrow internally.
+export function RichText({ data }: { data: unknown }) {
+  if (!data || typeof data !== 'object') return null
+  const root = (data as { root?: { children?: Node[] } }).root
+  if (!root?.children) return null
+  return <>{renderChildren(root.children)}</>
 }

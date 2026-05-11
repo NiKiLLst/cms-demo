@@ -30,7 +30,7 @@ export default async function BlogDetail({ params }: { params: Promise<{ slug: s
         // eslint-disable-next-line @next/next/no-img-element
         <img src={coverUrl} alt="" style={{ maxWidth: '100%', borderRadius: 6 }} />
       )}
-      <RichText data={post.body as { root?: { children?: never[] } }} />
+      <RichText data={post.body} />
     </div>
   )
 }

@@ -34,7 +34,7 @@ export default async function PortfolioDetail({ params }: { params: Promise<{ sl
       {item.externalUrl && (
         <p><a href={item.externalUrl} target="_blank" rel="noopener noreferrer">{item.externalUrl}</a></p>
       )}
-      <RichText data={item.description as { root?: { children?: never[] } }} />
+      <RichText data={item.description} />
       {images.map((url) => (
         // eslint-disable-next-line @next/next/no-img-element
         <img key={url} src={url} alt="" style={{ maxWidth: '100%', borderRadius: 6, marginTop: '1rem' }} />
