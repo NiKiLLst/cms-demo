@@ -21,31 +21,17 @@ Compila la matrice in fondo al `README.md` con i voti.
 
 | CMS | Frontend pubblico | Admin | Stato |
 |---|---|---|---|
-| **Strapi** | https://strapi.nerdass.org | https://strapi-admin.nerdass.org | ⚠️ DNS admin da aggiungere |
-| **Directus** | https://directus.nerdass.org | https://directus-admin.nerdass.org | ⚠️ DNS admin da aggiungere |
-| **PocketBase** | https://pocketbase.nerdass.org | https://pocketbase-admin.nerdass.org/_/ | ⚠️ DNS admin da aggiungere |
-| **Ghost** | https://ghost.nerdass.org | https://ghost.nerdass.org/ghost/ | ⚠️ Solo blog. Tema custom da attivare |
+| **Strapi** | https://strapi.nerdass.org | https://strapi-admin.nerdass.org | ✅ Pronto |
+| **Directus** | https://directus.nerdass.org | https://directus-admin.nerdass.org | ✅ Pronto |
+| **PocketBase** | https://pocketbase.nerdass.org | https://pocketbase-admin.nerdass.org/_/ | ✅ Pronto |
+| **Ghost** | https://ghost.nerdass.org | https://ghost.nerdass.org/ghost/ | ⚠️ Solo blog. **Tema custom da attivare manualmente** (vedi sotto) |
 | **PayloadCMS** | https://payload.nerdass.org | https://payload.nerdass.org/admin | ✅ Pronto |
-| **Appwrite** | https://appwrite-fe.nerdass.org | https://appwrite.nerdass.org/console | ⚠️ DNS frontend + setup manuale (vedi `apps/appwrite/README.md`) |
+| **Appwrite** | https://appwrite-fe.nerdass.org | https://appwrite.nerdass.org/console | ⚠️ **Setup project + push collections manuale** (vedi sotto) |
 | **Next.js (CMS-less)** | https://next.nerdass.org | n/a — git push | ✅ Pronto (è il caso "senza CMS" per confronto) |
 
-## Setup richiesto prima del primo test
+## Setup residuo (solo 2 azioni manuali)
 
-### 1. DNS Cloudflare (4 record CNAME da aggiungere)
-
-Dashboard Cloudflare → zona `nerdass.org` → DNS → Add record. Per ognuno:
-- Type: **CNAME**
-- Name: `strapi-admin` / `directus-admin` / `pocketbase-admin` / `appwrite-fe`
-- Target: `<tunnel-uuid>.cfargotunnel.com` (lo stesso degli altri subdomain esistenti)
-- Proxy: arancione (proxied)
-
-Poi nella sezione Zero Trust → Networks → Tunnels → cms-demo → Public Hostname,
-aggiungi 4 voci pubbliche corrispondenti:
-- Hostname `<subdomain>.nerdass.org`, Service `http://10.10.101.20:80`
-
-(Stesso pattern dei subdomain già configurati. Copia `infra/cloudflared/config.example.yml` se servono come template.)
-
-### 2. Ghost: attivare il tema custom
+### 1. Ghost: attivare il tema custom
 
 Il tema `cms-demo` è già stato copiato nel volume di Ghost ma serve attivarlo una volta:
 1. Vai su https://ghost.nerdass.org/ghost/
@@ -56,7 +42,7 @@ Senza questo step, `/blog/`, `/portfolio/`, `/prenotazioni/` rispondono 404 perc
 Se il tema **non compare** nell'elenco, il volume `ghost_content` è precedente al deploy del tema:
 - Carica manualmente via admin: zippa `apps/ghost/theme/cms-demo/` e upload sotto Settings → Design → Upload a theme.
 
-### 3. Appwrite: applicare lo schema
+### 2. Appwrite: applicare lo schema
 
 Appwrite non auto-crea le collezioni. Dopo il primo accesso a https://appwrite.nerdass.org/console (completa il setup wizard con Project ID = `cms-demo`):
 
@@ -70,7 +56,7 @@ appwrite push collection
 
 Dettagli in `apps/appwrite/README.md`.
 
-### 4. Credenziali admin
+### 3. Credenziali admin
 
 Tutte le creds (email admin + password) sono in Coolify panel → singola resource → Environment Variables. Per le 4 CMS che condividono email (Strapi, Directus, Payload, Appwrite, Ghost): contattare chi gestisce il deploy per la password.
 
