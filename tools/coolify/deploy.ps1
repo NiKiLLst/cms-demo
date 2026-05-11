@@ -54,24 +54,25 @@ function Sync-Tools {
     $repoUrl = 'https://github.com/NiKiLLst/cms-demo.git'
     $remoteRepo = '/opt/cms-demo'
     # The VM resolves DNS only via 10.10.101.2 (no public fallback) and that resolver
-    # has intermittent timeouts on outbound names like github.com. Retry git operations
-    # so a single DNS hiccup doesn't break sync.
+    # has intermittent timeouts on outbound names like github.com. Retry inline x5 so
+    # a single DNS hiccup doesn't kill the sync.
     $cmd = @"
-retry_git() {
-  local i
-  for i in 1 2 3 4 5; do
-    if "`$@`" 2>&1; then return 0; fi
-    echo "git retry `$i (DNS hiccup?)" >&2
-    sleep 5
-  done
-  return 1
-}
+ok=0
 if [ ! -d $remoteRepo/.git ]; then
   sudo mkdir -p $remoteRepo && sudo chown debian:debian $remoteRepo
-  retry_git git clone --depth 1 $repoUrl $remoteRepo
+  for i in 1 2 3 4 5; do
+    git clone --depth 1 $repoUrl $remoteRepo 2>&1 && ok=1 && break
+    echo "git clone retry \$i" >&2; sleep 5
+  done
 else
-  cd $remoteRepo && retry_git git fetch --depth 1 origin main && git reset --hard origin/main
+  cd $remoteRepo
+  for i in 1 2 3 4 5; do
+    git fetch --depth 1 origin main 2>&1 && ok=1 && break
+    echo "git fetch retry \$i" >&2; sleep 5
+  done
+  [ \$ok -eq 1 ] && git reset --hard origin/main
 fi
+[ \$ok -eq 0 ] && echo "git sync exhausted retries; continuing with last known repo state" >&2
 rm -rf $RemoteDir && mkdir -p $RemoteDir
 cp -r $remoteRepo/tools/coolify/. $RemoteDir/
 "@
