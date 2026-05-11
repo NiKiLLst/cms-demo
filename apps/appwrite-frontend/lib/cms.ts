@@ -6,7 +6,7 @@
 import type { BlogPost, BookingInput, PortfolioItem } from "./types";
 
 const BASE = process.env.CMS_URL ?? "http://appwrite.nerdass.org/v1";
-const PROJECT_ID = process.env.APPWRITE_PROJECT_ID ?? "cms-demo";
+const PROJECT_ID = process.env.APPWRITE_PROJECT_ID ?? "6a01cf6200397c24c6ab";
 const DATABASE_ID = process.env.APPWRITE_DATABASE_ID ?? "main";
 
 function headers(extra: Record<string, string> = {}): Record<string, string> {
