@@ -163,7 +163,7 @@ cmss:
       PORT:                   "3000"
       NODE_ENV:               production
       CMS_URL:                http://appwrite.nerdass.org/v1
-      APPWRITE_PROJECT_ID:    cms-demo
+      APPWRITE_PROJECT_ID:    6a01cf6200397c24c6ab
       APPWRITE_DATABASE_ID:   main
       CMS_NAME:               Appwrite
       ADMIN_URL:              http://appwrite.nerdass.org/console
