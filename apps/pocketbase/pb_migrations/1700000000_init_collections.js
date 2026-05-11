@@ -14,7 +14,7 @@ migrate(
       createRule: null,
       updateRule: null,
       deleteRule: null,
-      fields: [
+      schema: [
         { name: "title",        type: "text",   required: true },
         { name: "slug",         type: "text",   required: true, unique: true },
         { name: "excerpt",      type: "text" },
@@ -24,7 +24,7 @@ migrate(
         { name: "author",       type: "text" },
       ],
     });
-    app.saveCollection(blogPost);
+    app.dao().saveCollection(blogPost);
 
     // ---- portfolio_item ---------------------------------------------------
     const portfolio = new Collection({
@@ -35,7 +35,7 @@ migrate(
       createRule: null,
       updateRule: null,
       deleteRule: null,
-      fields: [
+      schema: [
         { name: "title",        type: "text",   required: true },
         { name: "slug",         type: "text",   required: true, unique: true },
         { name: "description",  type: "editor", required: true },
@@ -44,7 +44,7 @@ migrate(
         { name: "tags",         type: "json" },
       ],
     });
-    app.saveCollection(portfolio);
+    app.dao().saveCollection(portfolio);
 
     // ---- booking ----------------------------------------------------------
     const booking = new Collection({
@@ -55,7 +55,7 @@ migrate(
       createRule: "",
       updateRule: null,
       deleteRule: null,
-      fields: [
+      schema: [
         { name: "name",     type: "text", required: true },
         { name: "email",    type: "email", required: true },
         { name: "datetime", type: "date", required: true },
@@ -63,13 +63,13 @@ migrate(
         { name: "status",   type: "select", values: ["new", "confirmed", "cancelled"] },
       ],
     });
-    app.saveCollection(booking);
+    app.dao().saveCollection(booking);
   },
   (app) => {
     for (const name of ["blog_post", "portfolio_item", "booking"]) {
       try {
-        const c = app.findCollectionByNameOrId(name);
-        app.deleteCollection(c);
+        const c = app.dao().findCollectionByNameOrId(name);
+        app.dao().deleteCollection(c);
       } catch (_) {
         // collection doesn't exist — nothing to roll back
       }
