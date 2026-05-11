@@ -26,6 +26,9 @@ apps/nextjs-demo/.next/
 # PocketBase local data
 apps/pocketbase/pb_data/
 
+# Ghost theme distribution zips (built on demand from theme/cms-demo/)
+apps/ghost/theme/*.zip
+
 # Cloudflared credentials (never commit tunnel secrets, tokens, or configs)
 infra/cloudflared/*
 !infra/cloudflared/*.example.*
