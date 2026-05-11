@@ -2,6 +2,10 @@ import Link from 'next/link'
 import { getPayload } from 'payload'
 import config from '@/payload.config'
 
+// Opt out of static prerendering — payload.find() needs a live Postgres
+// connection, which the build environment doesn't have.
+export const dynamic = 'force-dynamic'
+
 export default async function BlogIndex() {
   const payload = await getPayload({ config: await config })
   const { docs } = await payload.find({

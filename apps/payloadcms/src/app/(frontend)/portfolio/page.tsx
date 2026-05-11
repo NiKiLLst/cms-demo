@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { getPayload } from 'payload'
 import config from '@/payload.config'
 
+export const dynamic = 'force-dynamic'
+
 export default async function PortfolioIndex() {
   const payload = await getPayload({ config: await config })
   const { docs } = await payload.find({
