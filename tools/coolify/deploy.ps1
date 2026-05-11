@@ -53,12 +53,24 @@ function Sync-Tools {
     Write-Host "[deploy.ps1] syncing tools/ via git on $VmTarget ..."
     $repoUrl = 'https://github.com/NiKiLLst/cms-demo.git'
     $remoteRepo = '/opt/cms-demo'
+    # The VM resolves DNS only via 10.10.101.2 (no public fallback) and that resolver
+    # has intermittent timeouts on outbound names like github.com. Retry git operations
+    # so a single DNS hiccup doesn't break sync.
     $cmd = @"
+retry_git() {
+  local i
+  for i in 1 2 3 4 5; do
+    if "`$@`" 2>&1; then return 0; fi
+    echo "git retry `$i (DNS hiccup?)" >&2
+    sleep 5
+  done
+  return 1
+}
 if [ ! -d $remoteRepo/.git ]; then
   sudo mkdir -p $remoteRepo && sudo chown debian:debian $remoteRepo
-  git clone --depth 1 $repoUrl $remoteRepo
+  retry_git git clone --depth 1 $repoUrl $remoteRepo
 else
-  cd $remoteRepo && git fetch --depth 1 origin main && git reset --hard origin/main
+  cd $remoteRepo && retry_git git fetch --depth 1 origin main && git reset --hard origin/main
 fi
 rm -rf $RemoteDir && mkdir -p $RemoteDir
 cp -r $remoteRepo/tools/coolify/. $RemoteDir/

@@ -38,6 +38,36 @@ sudo docker exec -u 0 coolify chmod -R a+rX /tmp/cms-deploy
 # rerun, the old bytecode is reused unless we invalidate. Reset before each run.
 sudo docker exec coolify php -r "if (function_exists('opcache_reset')) opcache_reset();"
 
+# ---------- Manifest-driven pre-pull for known heavy templates ----------
+# The VM's only resolver (10.10.101.2) sometimes drops a DNS reply mid-`docker pull`,
+# which Coolify surfaces as "Image Pulling Interrupted" and aborts the deploy. Pre-pull
+# under a retry loop so by the time the framework dispatches StartService, every image
+# is already in the local Docker layer cache.
+pre_pull_images() {
+    local images=$1
+    for img in $images; do
+        local pulled=0
+        for try in 1 2 3 4 5; do
+            if sudo docker pull "$img" >/dev/null 2>&1; then
+                echo "[deploy.sh] pull ok for $img" >&2
+                pulled=1
+                break
+            fi
+            echo "[deploy.sh] pull retry $try for $img (DNS hiccup?)" >&2
+            sleep 5
+        done
+        if [ "$pulled" = 0 ]; then
+            echo "[deploy.sh] WARN: pre-pull of $img exhausted retries; deploy may still recover" >&2
+        fi
+    done
+}
+case "$CMS_KEY" in
+    appwrite)
+        echo "[deploy.sh] pre-pulling Appwrite stack images ..." >&2
+        pre_pull_images "mariadb:10.11 redis:7.2.4-alpine appwrite/appwrite:1.5 appwrite/appwrite:1.5.1 appwrite/assistant:0.4.0 openruntimes/executor:0.4.9"
+        ;;
+esac
+
 # ---------- Run deployer (under tinker so Laravel is bootstrapped) ----------
 echo "[deploy.sh] running deployer for $CMS_KEY ..." >&2
 FORCE_VAL="0"
@@ -61,11 +91,31 @@ fi
 DEPLOY_UUID=$(echo "$RESULT_JSON" | python3 -c "import sys,json;print(json.load(sys.stdin).get('deployment_uuid',''))")
 DEPLOY_TABLE=$(echo "$RESULT_JSON" | python3 -c "import sys,json;print(json.load(sys.stdin).get('deploy_table',''))")
 FQDN=$(echo "$RESULT_JSON" | python3 -c "import sys,json;print(json.load(sys.stdin).get('fqdn',''))")
+RESOURCE_UUID=$(echo "$RESULT_JSON" | python3 -c "import sys,json;print(json.load(sys.stdin).get('resource_uuid',''))")
+TEMPLATE=$(echo "$RESULT_JSON" | python3 -c "import sys,json;print(json.load(sys.stdin).get('template') or '')")
 
 # ---------- Poll deployment status ----------
-# Service deployments don't write to application_deployment_queues; in that case we
-# skip polling and just rely on the post-deploy curl.
-if [ "$DEPLOY_TABLE" = "application_deployment_queues" ] && [ -n "$DEPLOY_UUID" ]; then
+# Service deployments DON'T populate application_deployment_queues. Coolify uses Redis
+# (Horizon) for service deploy jobs and writes to failed_jobs only on error. So for
+# service deploys we poll by primary container status instead. The primary container
+# name is "<template>-<resource_uuid>" (e.g. "appwrite-e357ae86-...").
+if [ -n "$TEMPLATE" ] && [ -n "$RESOURCE_UUID" ]; then
+    echo "[deploy.sh] polling container ${TEMPLATE}-${RESOURCE_UUID} ..." >&2
+    UP_FOR=0
+    for i in $(seq 1 60); do
+        STATUS=$(sudo docker ps --filter "name=^${TEMPLATE}-${RESOURCE_UUID}\$" --format '{{.Status}}' 2>/dev/null | head -1)
+        printf "[deploy.sh] poll %02d primary: %s\n" "$i" "${STATUS:-not-running}" >&2
+        case "$STATUS" in
+            "Up "*)
+                UP_FOR=$((UP_FOR + 1))
+                # Require 2 consecutive Up readings to confirm not a restart-loop
+                [ "$UP_FOR" -ge 2 ] && break
+                ;;
+            *) UP_FOR=0 ;;
+        esac
+        sleep 15
+    done
+elif [ "$DEPLOY_TABLE" = "application_deployment_queues" ] && [ -n "$DEPLOY_UUID" ]; then
     echo "[deploy.sh] polling $DEPLOY_TABLE for $DEPLOY_UUID ..." >&2
     for i in $(seq 1 60); do
         STATUS=$(sudo docker exec coolify-db psql -U coolify -d coolify -tA \

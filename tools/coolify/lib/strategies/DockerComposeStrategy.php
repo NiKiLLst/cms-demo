@@ -44,9 +44,13 @@ final class DockerComposeStrategy implements DeployStrategyInterface
             'build_pack'               => 'dockercompose',
             'base_directory'           => $baseDir,
             'docker_compose_location'  => $descriptor['docker_compose_location'],
-            // Coolify expects {"<service>":{"domain":"http://..."}} — manifest gives the
-            // flatter {"<service>":"http://..."} for ergonomics; lift it here.
-            'docker_compose_domains'   => json_encode(self::wrapDomains($descriptor['docker_compose_domains'])),
+            // Coolify stores docker_compose_domains as a JSON string (no Eloquent
+            // cast on the column). The manifest may declare either flat or nested
+            // shape; normalize to nested then encode ourselves with full quoting.
+            'docker_compose_domains'   => json_encode(
+                self::wrapDomains($descriptor['docker_compose_domains']),
+                JSON_UNESCAPED_SLASHES,
+            ),
             'fqdn'                     => $descriptor['fqdn'],
             // ports_exposes is NOT NULL on applications; Coolify ignores it for
             // dockercompose at runtime (it parses the compose's expose: blocks

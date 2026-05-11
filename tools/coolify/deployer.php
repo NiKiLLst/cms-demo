@@ -122,6 +122,7 @@ echo json_encode([
     'resource_uuid'   => $resource->uuid,
     'resource_name'   => $resource->name ?? null,
     'fqdn'            => $descriptor['fqdn'] ?? null,
+    'template'        => $descriptor['template'] ?? null,
     'deployment_uuid' => $deploymentUuid,
     'deploy_table'    => $strategy->deploymentTable(),
     'new_pins'        => array_keys($resolver->getNewPins()),

@@ -33,6 +33,18 @@ final class ServiceTemplateStrategy implements DeployStrategyInterface
             $existing = stripAppendedAttributes($existing);
             $existing->save();
             $this->setFqdnOnPrimarySubApp($existing, $descriptor);
+
+            // CRITICAL: invalidate the cached parsed compose so the next deploy
+            // re-parses it against the (now updated) environment_variables.
+            // Without this, env vars added/changed after the initial parse never
+            // reach the deployed containers (Coolify uses services.docker_compose
+            // verbatim and that's frozen to the first parse). parse(isNew:false)
+            // preserves the existing service_applications/service_databases IDs.
+            $existing->docker_compose = null;
+            $existing->config_hash = null;
+            $existing->save();
+            $existing->parse(isNew: false);
+
             return $existing;
         }
 
@@ -97,6 +109,16 @@ final class ServiceTemplateStrategy implements DeployStrategyInterface
 
     public function deploy(object $resource, bool $forceRebuild): string
     {
+        // Re-parse one more time AFTER EnvSync has filled all env vars; this
+        // bakes the freshly-applied env values into services.docker_compose so
+        // the dispatched container set sees them.
+        if ($resource instanceof Service) {
+            $resource->docker_compose = null;
+            $resource->config_hash = null;
+            $resource->save();
+            $resource->parse(isNew: false);
+        }
+
         $deploymentUuid = (string) Str::uuid();
 
         // Coolify renamed the service deployment helper between versions; dispatch
