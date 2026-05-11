@@ -24,7 +24,7 @@ migrate(
         { name: "author",       type: "text" },
       ],
     });
-    app.save(blogPost);
+    app.saveCollection(blogPost);
 
     // ---- portfolio_item ---------------------------------------------------
     const portfolio = new Collection({
@@ -44,7 +44,7 @@ migrate(
         { name: "tags",         type: "json" },
       ],
     });
-    app.save(portfolio);
+    app.saveCollection(portfolio);
 
     // ---- booking ----------------------------------------------------------
     const booking = new Collection({
@@ -63,13 +63,13 @@ migrate(
         { name: "status",   type: "select", values: ["new", "confirmed", "cancelled"] },
       ],
     });
-    app.save(booking);
+    app.saveCollection(booking);
   },
   (app) => {
     for (const name of ["blog_post", "portfolio_item", "booking"]) {
       try {
         const c = app.findCollectionByNameOrId(name);
-        app.delete(c);
+        app.deleteCollection(c);
       } catch (_) {
         // collection doesn't exist — nothing to roll back
       }

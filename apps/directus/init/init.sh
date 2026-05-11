@@ -108,16 +108,15 @@ create_collection booking '{
   ]
 }'
 
-# 6. Public access. Directus 11 attaches permissions to policies, and there is a
-#    built-in Public policy used for unauthenticated requests. Find its ID.
-PUBLIC_POLICY_ID="$(curl -fsS -H "$AUTH" "$DIRECTUS_URL/policies?filter[name][_eq]=%24t%3Apublic_label&limit=1" | jq -r '.data[0].id // empty')"
+# 6. Public access. Directus 11 attaches permissions to policies, and the
+#    Public policy is the one used for unauthenticated requests. Its name is
+#    translated client-side, so the server stores either the literal "Public"
+#    or a `$t:public_label` key depending on version. We identify it by the
+#    invariants instead: not admin, not app-access, no role link.
+PUBLIC_POLICY_ID="$(curl -fgsS -H "$AUTH" "$DIRECTUS_URL/policies?filter[admin_access][_eq]=false&filter[app_access][_eq]=false&limit=1" | jq -r '.data[0].id // empty')"
 if [ -z "$PUBLIC_POLICY_ID" ]; then
-  # Fallback: try the literal "Public" name (varies across versions).
-  PUBLIC_POLICY_ID="$(curl -fsS -H "$AUTH" "$DIRECTUS_URL/policies?filter[name][_eq]=Public&limit=1" | jq -r '.data[0].id // empty')"
-fi
-if [ -z "$PUBLIC_POLICY_ID" ]; then
-  log "Could not locate the Public policy — listing all policies:"
-  curl -fsS -H "$AUTH" "$DIRECTUS_URL/policies" | jq -r '.data[] | "\(.id) \(.name)"'
+  log "Could not locate the Public policy — listing all policies for diagnosis:"
+  curl -fgsS -H "$AUTH" "$DIRECTUS_URL/policies" | jq -r '.data[] | "\(.id) name=\(.name) admin=\(.admin_access) app=\(.app_access)"'
   exit 1
 fi
 log "Public policy ID: $PUBLIC_POLICY_ID"
@@ -126,7 +125,7 @@ log "Public policy ID: $PUBLIC_POLICY_ID"
 grant_public() {
   local collection="$1"; local action="$2"
   local exists
-  exists="$(curl -fsS -H "$AUTH" \
+  exists="$(curl -fgsS -H "$AUTH" \
     "$DIRECTUS_URL/permissions?filter[policy][_eq]=$PUBLIC_POLICY_ID&filter[collection][_eq]=$collection&filter[action][_eq]=$action&limit=1" \
     | jq -r '.data | length')"
   if [ "$exists" -gt 0 ]; then
