@@ -84,19 +84,27 @@ function mapPortfolio(raw: RawPortfolioItem): PortfolioItem {
   };
 }
 
-// Appwrite query helper: builds the queries[] querystring entries.
-function qs(queries: string[]): string {
+// Appwrite v1.5 expects each query to be a JSON-encoded object with method+
+// attribute+values, NOT the old function-string DSL. Helper serialises each
+// query and appends to the queries[] querystring.
+type AwQuery = { method: string; attribute?: string; values?: unknown[] };
+
+function qs(queries: AwQuery[]): string {
   const params = new URLSearchParams();
-  for (const q of queries) params.append("queries[]", q);
+  for (const q of queries) params.append("queries[]", JSON.stringify(q));
   return params.toString();
 }
 
+const Q = {
+  isNotNull: (attr: string): AwQuery => ({ method: "isNotNull", attribute: attr, values: [] }),
+  orderDesc: (attr: string): AwQuery => ({ method: "orderDesc", attribute: attr }),
+  orderAsc:  (attr: string): AwQuery => ({ method: "orderAsc",  attribute: attr }),
+  limit:     (n: number):    AwQuery => ({ method: "limit", values: [n] }),
+  equal:     (attr: string, val: string | number): AwQuery => ({ method: "equal", attribute: attr, values: [val] }),
+};
+
 export async function listBlogPosts(): Promise<BlogPost[]> {
-  const queries = qs([
-    'isNotNull("published_at")',
-    'orderDesc("published_at")',
-    'limit(200)',
-  ]);
+  const queries = qs([Q.isNotNull("published_at"), Q.orderDesc("published_at"), Q.limit(200)]);
   const data = await awGet<AppwriteList<RawBlogPost>>(
     `/databases/${DATABASE_ID}/collections/blog_post/documents?${queries}`,
   );
@@ -104,7 +112,7 @@ export async function listBlogPosts(): Promise<BlogPost[]> {
 }
 
 export async function getBlogPost(slug: string): Promise<BlogPost | null> {
-  const queries = qs([`equal("slug",["${slug.replace(/"/g, '\\"')}"])`, "limit(1)"]);
+  const queries = qs([Q.equal("slug", slug), Q.limit(1)]);
   const data = await awGet<AppwriteList<RawBlogPost>>(
     `/databases/${DATABASE_ID}/collections/blog_post/documents?${queries}`,
   );
@@ -112,7 +120,7 @@ export async function getBlogPost(slug: string): Promise<BlogPost | null> {
 }
 
 export async function listPortfolioItems(): Promise<PortfolioItem[]> {
-  const queries = qs(['orderDesc("$createdAt")', "limit(200)"]);
+  const queries = qs([Q.orderDesc("$createdAt"), Q.limit(200)]);
   const data = await awGet<AppwriteList<RawPortfolioItem>>(
     `/databases/${DATABASE_ID}/collections/portfolio_item/documents?${queries}`,
   );
@@ -120,7 +128,7 @@ export async function listPortfolioItems(): Promise<PortfolioItem[]> {
 }
 
 export async function getPortfolioItem(slug: string): Promise<PortfolioItem | null> {
-  const queries = qs([`equal("slug",["${slug.replace(/"/g, '\\"')}"])`, "limit(1)"]);
+  const queries = qs([Q.equal("slug", slug), Q.limit(1)]);
   const data = await awGet<AppwriteList<RawPortfolioItem>>(
     `/databases/${DATABASE_ID}/collections/portfolio_item/documents?${queries}`,
   );
