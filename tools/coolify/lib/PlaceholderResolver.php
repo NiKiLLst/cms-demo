@@ -129,10 +129,15 @@ final class PlaceholderResolver
             // already exists in Coolify with `key == LABEL`. Adopt that value as the
             // pin instead of rotating it (which would invalidate DB encryption keys,
             // session secrets, DB role passwords, etc.).
+            // Skip empty/null adoptions — service-template parsing seeds env_vars rows
+            // with NULL values for every interpolation placeholder in the compose,
+            // and adopting "" would defeat the point.
             if (array_key_exists($label, $this->existingEnv)) {
                 $adopted = $this->existingEnv[$label];
-                $this->newPins[$label] = $adopted;   // persist as __PIN__<label> next run.
-                return $adopted;
+                if ($adopted !== null && $adopted !== '') {
+                    $this->newPins[$label] = $adopted;
+                    return $adopted;
+                }
             }
             // No existing value anywhere — generate per spec.
             $spec = $rest[0] ?? 'b64:24';

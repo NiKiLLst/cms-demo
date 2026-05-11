@@ -87,6 +87,12 @@ final class EnvSync
 
         $out = [];
         foreach ($rows as $row) {
+            // Skip empty values — service-template parsing inserts NULL rows for
+            // every compose interpolation placeholder, and we don't want to adopt
+            // "" as a secret.
+            if ($row->value === null || $row->value === '') {
+                continue;
+            }
             $out[$row->key] = $row->value;
         }
         return $out;
