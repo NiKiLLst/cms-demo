@@ -118,13 +118,16 @@ cmss:
       _APP_DOMAIN_TARGET:          appwrite.nerdass.org
       _APP_DOMAIN_FUNCTIONS:       appwrite.nerdass.org
       _APP_SYSTEM_EMAIL_ADDRESS:   filippo.ferretti@gmail.com
-      _APP_DB_HOST:                mariadb
+      # Coolify aliases compose service names with the resource UUID prefix —
+      # bare "mariadb" / "redis" do NOT resolve in the container network; the
+      # working alias is the container_name "appwrite-mariadb" / "appwrite-redis".
+      _APP_DB_HOST:                appwrite-mariadb
       _APP_DB_PORT:                "3306"
       _APP_DB_USER:                appwrite
       _APP_DB_SCHEMA:              appwrite
       _APP_DB_PASS:                "{{secret_pin:_APP_DB_PASS|hex:24}}"
       _APP_DB_ROOT_PASS:           "{{secret_pin:_APP_DB_ROOT_PASS|hex:24}}"
-      _APP_REDIS_HOST:             redis
+      _APP_REDIS_HOST:             appwrite-redis
       _APP_REDIS_PORT:             "6379"
       _APP_OPENSSL_KEY_V1:         "{{secret_pin:_APP_OPENSSL_KEY_V1|hex:32}}"
       _APP_EXECUTOR_SECRET:        "{{secret_pin:_APP_EXECUTOR_SECRET|hex:32}}"
