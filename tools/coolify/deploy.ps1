@@ -47,28 +47,24 @@ $JumpHost   = 'proxmox'
 $RemoteDir  = '/tmp/cms-deploy'
 
 function Sync-Tools {
-    Write-Host "[deploy.ps1] streaming tools/ to $VmTarget`:$RemoteDir ..."
-    $localTar = Join-Path $env:TEMP "cms-tools-$PID.tar"
-    # Use the Windows-bundled bsdtar explicitly (MSYS / Git-Bash ship a different
-    # tar that mangles drive-letter paths like C:\Claude\... as hostnames).
-    $tarExe = Join-Path $env:SystemRoot 'System32\tar.exe'
-    try {
-        & $tarExe c -C $ToolsDir -f $localTar .
-        if ($LASTEXITCODE -ne 0) { throw "local tar failed (exit $LASTEXITCODE)" }
-
-        ssh -J $JumpHost $VmTarget "rm -rf $RemoteDir && mkdir -p $RemoteDir" | Out-Null
-        if ($LASTEXITCODE -ne 0) { throw "remote prep failed (exit $LASTEXITCODE)" }
-
-        # scp -J works on OpenSSH 8+. The -O flag forces legacy scp mode (avoids
-        # sftp's chmod weirdness on read-only working copies).
-        scp -O -J $JumpHost $localTar "${VmTarget}:${RemoteDir}/_tools.tar"
-        if ($LASTEXITCODE -ne 0) { throw "scp upload failed (exit $LASTEXITCODE)" }
-
-        ssh -J $JumpHost $VmTarget "tar x -C $RemoteDir -f $RemoteDir/_tools.tar && rm $RemoteDir/_tools.tar"
-        if ($LASTEXITCODE -ne 0) { throw "remote extract failed (exit $LASTEXITCODE)" }
-    } finally {
-        if (Test-Path $localTar) { Remove-Item -Force $localTar }
-    }
+    # We can't reliably ship binary tarballs over the Cloudflare Access SSH proxy
+    # (it drops mid-pipe). Instead, mirror the repo on the VM with git, then point
+    # deploy.sh at the on-VM copy.
+    Write-Host "[deploy.ps1] syncing tools/ via git on $VmTarget ..."
+    $repoUrl = 'https://github.com/NiKiLLst/cms-demo.git'
+    $remoteRepo = '/opt/cms-demo'
+    $cmd = @"
+if [ ! -d $remoteRepo/.git ]; then
+  sudo mkdir -p $remoteRepo && sudo chown debian:debian $remoteRepo
+  git clone --depth 1 $repoUrl $remoteRepo
+else
+  cd $remoteRepo && git fetch --depth 1 origin main && git reset --hard origin/main
+fi
+rm -rf $RemoteDir && mkdir -p $RemoteDir
+cp -r $remoteRepo/tools/coolify/. $RemoteDir/
+"@
+    ssh -J $JumpHost $VmTarget $cmd
+    if ($LASTEXITCODE -ne 0) { throw "git sync failed (exit $LASTEXITCODE)" }
 }
 
 function Invoke-Deploy([string]$cmsKey) {
