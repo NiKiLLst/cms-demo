@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Next.js demo — 7° demo "CMS-less"
 
-## Getting Started
+Settima variante della demo comparativa: nessun CMS. I tre canali standard
+(`/blog`, `/portfolio`, `/prenotazioni`) vivono come segue:
 
-First, run the development server:
+- **/blog**: file Markdown in `content/blog/*.md` con frontmatter (title, publishedAt, author, excerpt). Letti server-side via `lib/content.ts`.
+- **/portfolio**: file Markdown in `content/portfolio/*.md` con frontmatter (title, description, externalUrl, tags).
+- **/prenotazioni**: form pubblico che POSTa a `/api/bookings`, che appende a `/app/data/bookings.json` sul container.
+
+## Risultato di validazione
+
+Lo scopo di questa demo è essere **il contrasto** delle altre sei: mostra cosa
+significa "fare un sito con Next.js senza CMS" in termini concreti.
+
+| Capability | nextjs-demo (CMS-less) | gli altri 6 CMS |
+|---|---|---|
+| Editor non-dev può creare un articolo | ❌ — serve git push | ✅ — admin UI |
+| Vedere le prenotazioni in tabella | ❌ — ssh + cat /app/data/bookings.json | ✅ — admin UI |
+| Upload immagini dal browser | ❌ | ✅ |
+| Bozze + workflow di pubblicazione | ❌ | ✅ (dove supportato) |
+| Persistenza dei dati cliente | ⚠️ se manca un volume mount, perdi tutto al redeploy | ✅ named volume per DB |
+
+## Persistenza delle prenotazioni
+
+Le prenotazioni atterrano in `/app/data/bookings.json`. Affinché sopravvivano
+ai redeploy serve un **persistent storage** mappato su `/app/data` nella risorsa
+Coolify (panel: Storage → Add Persistent Storage). Senza quello, ogni rebuild
+butta via le richieste raccolte. **Questo è parte del messaggio**: senza un
+CMS che gestisce DB + backup nativamente, devi pensare tu a queste cose.
+
+## Far evolvere i contenuti
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cd apps/nextjs-demo
+# nuovo articolo
+cat > content/blog/nuovo-articolo.md <<'EOF'
+---
+title: "Titolo"
+publishedAt: "2026-05-15"
+---
+
+Corpo in markdown.
+EOF
+
+git add . && git commit -m "blog: nuovo articolo" && git push
+# Coolify rebuilda → l'articolo appare su next.nerdass.org/blog
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Tempo per pubblicare: tempo che impiega `git push` + tempo di build Coolify.
+Confronta con un CMS vero (es. Directus): login + new entry + publish = 30 secondi,
+senza tirare in mezzo gli sviluppatori.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Dev locale
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm install
+npm run dev
+```

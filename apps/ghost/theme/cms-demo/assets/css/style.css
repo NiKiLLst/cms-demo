@@ -1,0 +1,72 @@
+:root {
+  --fg: #111;
+  --bg: #fafafa;
+  --muted: #666;
+  --border: #ddd;
+  --accent: #2563eb;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  color: var(--fg);
+  background: var(--bg);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+body { display: flex; flex-direction: column; }
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-nav {
+  border-bottom: 1px solid var(--border);
+  padding: 1rem;
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  font-size: 0.95rem;
+  background: white;
+}
+.site-nav .brand { font-weight: 600; margin-right: auto; }
+.site-nav .brand a { color: var(--fg); }
+.site-nav a { color: var(--fg); }
+.site-nav .admin-link { margin-left: auto; color: var(--accent); }
+
+.site-main { flex: 1; }
+
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+h1 { font-size: 1.75rem; margin: 0 0 1rem; }
+h2 { font-size: 1.25rem; margin: 1.5rem 0 0.5rem; }
+p  { margin: 0.5rem 0; }
+
+.card {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1rem;
+  margin: 1rem 0;
+  background: white;
+}
+.muted { color: var(--muted); font-size: 0.85rem; }
+
+img { max-width: 100%; height: auto; border-radius: 6px; }
+
+.post-body { margin-top: 1.5rem; }
+.post-body p { margin: 0.75rem 0; }
+
+.site-footer {
+  border-top: 1px solid var(--border);
+  padding: 1rem;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.85rem;
+}

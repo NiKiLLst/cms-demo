@@ -1,0 +1,22 @@
+{
+  "kind": "collectionType",
+  "collectionName": "portfolio_items",
+  "info": {
+    "singularName": "portfolio-item",
+    "pluralName": "portfolio-items",
+    "displayName": "Portfolio Item",
+    "description": "Elementi del portfolio gestiti dall'admin Strapi"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title":       { "type": "string", "required": true },
+    "slug":        { "type": "uid", "targetField": "title", "required": true },
+    "description": { "type": "richtext", "required": true },
+    "images":      { "type": "media", "multiple": true, "allowedTypes": ["images"] },
+    "externalUrl": { "type": "string" },
+    "tags":        { "type": "json" }
+  }
+}

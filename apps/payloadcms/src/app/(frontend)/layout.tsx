@@ -1,18 +1,27 @@
 import React from 'react'
+import Link from 'next/link'
 import './styles.css'
 
 export const metadata = {
-  description: 'A blank template using Payload in a Next.js app.',
-  title: 'Payload Blank Template',
+  description: "cms-demo · PayloadCMS",
+  title: 'cms-demo (PayloadCMS)',
 }
 
 export default async function RootLayout(props: { children: React.ReactNode }) {
   const { children } = props
-
   return (
-    <html lang="en">
+    <html lang="it">
       <body>
-        <main>{children}</main>
+        <nav className="site-nav">
+          <span className="brand">cms-demo</span>
+          <Link href="/">Home</Link>
+          <Link href="/blog">Blog</Link>
+          <Link href="/portfolio">Portfolio</Link>
+          <Link href="/prenotazioni">Prenotazioni</Link>
+          <a href="/admin" className="admin-link">Admin</a>
+        </nav>
+        <main className="site-main">{children}</main>
+        <footer className="site-footer">powered by PayloadCMS</footer>
       </body>
     </html>
   )

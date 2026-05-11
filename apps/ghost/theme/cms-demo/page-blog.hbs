@@ -1,0 +1,22 @@
+{{!< default}}
+
+{{!-- Custom template for the "blog" page slug: lists all published posts. --}}
+<div class="container">
+    <h1>Blog</h1>
+    {{#get "posts" limit="all" order="published_at desc"}}
+        {{#if posts}}
+            {{#foreach posts}}
+                <article class="card">
+                    <h2><a href="{{url}}">{{title}}</a></h2>
+                    <p class="muted">
+                        {{date published_at format="DD/MM/YYYY"}}
+                        {{#if primary_author}} · {{primary_author.name}}{{/if}}
+                    </p>
+                    {{#if excerpt}}<p>{{excerpt}}</p>{{/if}}
+                </article>
+            {{/foreach}}
+        {{else}}
+            <p class="muted">Nessun articolo pubblicato.</p>
+        {{/if}}
+    {{/get}}
+</div>

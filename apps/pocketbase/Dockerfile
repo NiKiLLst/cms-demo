@@ -9,6 +9,12 @@ RUN apk add --no-cache ca-certificates unzip wget \
  && chmod +x /usr/local/bin/pocketbase
 
 WORKDIR /pb
+
+# Bake migrations into the image — they're code, not data. PocketBase tracks
+# execution in the _migrations table inside pb_data, so the file being present
+# at boot every time is harmless.
+COPY pb_migrations /pb/pb_migrations
+
 EXPOSE 8090
 
 CMD ["pocketbase", "serve", "--http=0.0.0.0:8090"]

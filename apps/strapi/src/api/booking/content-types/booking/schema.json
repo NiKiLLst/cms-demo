@@ -1,0 +1,26 @@
+{
+  "kind": "collectionType",
+  "collectionName": "bookings",
+  "info": {
+    "singularName": "booking",
+    "pluralName": "bookings",
+    "displayName": "Booking",
+    "description": "Prenotazioni inviate dal form pubblico"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name":     { "type": "string", "required": true },
+    "email":    { "type": "email",  "required": true },
+    "datetime": { "type": "datetime", "required": true },
+    "notes":    { "type": "text" },
+    "status":   {
+      "type": "enumeration",
+      "enum": ["new", "confirmed", "cancelled"],
+      "default": "new",
+      "required": true
+    }
+  }
+}

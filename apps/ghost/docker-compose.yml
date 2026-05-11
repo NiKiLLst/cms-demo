@@ -1,6 +1,6 @@
 services:
   ghost:
-    image: ghost:5
+    build: .
     environment:
       url: ${GHOST_URL}
       database__client: mysql

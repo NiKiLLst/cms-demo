@@ -11,6 +11,7 @@ build/
 .cache/
 .turbo/
 .parcel-cache/
+*.tsbuildinfo
 
 # Strapi
 apps/strapi/.tmp/
@@ -47,3 +48,7 @@ desktop.ini
 
 # Claude Code session settings
 .claude/settings.local.json
+
+# Local credentials sheet (admin pass etc.) — review before committing
+CREDENTIALS.md
+credentials.md

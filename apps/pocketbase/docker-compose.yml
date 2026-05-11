@@ -2,13 +2,11 @@ services:
   pocketbase:
     build: .
     volumes:
+      # Only pb_data is stateful (SQLite DB + uploaded files). pb_migrations and
+      # pb_hooks are code and live in the image so updates ship via rebuild.
       - pocketbase_data:/pb/pb_data
-      - pocketbase_hooks:/pb/pb_hooks
-      - pocketbase_migrations:/pb/pb_migrations
     expose:
       - "8090"
 
 volumes:
   pocketbase_data:
-  pocketbase_hooks:
-  pocketbase_migrations:

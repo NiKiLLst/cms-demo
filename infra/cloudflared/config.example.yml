@@ -3,11 +3,17 @@
 # and place the credentials JSON next to it. Each ingress rule maps a public
 # hostname to Coolify's internal Traefik (which listens on the VM's :80 and
 # routes by Host header to the right container).
+#
+# For each hostname listed below you ALSO need:
+#   1. A CNAME record in Cloudflare DNS: <subdomain> → <YOUR_TUNNEL_UUID>.cfargotunnel.com
+#   2. (Optional) A Cloudflare Access policy on the /admin or /ghost path of the
+#      admin subdomains.
 
 tunnel: <YOUR_TUNNEL_UUID>
 credentials-file: /etc/cloudflared/<YOUR_TUNNEL_UUID>.json
 
 ingress:
+  # ---- Public frontends -----------------------------------------------------
   - hostname: strapi.example.com
     service: http://localhost:80
   - hostname: directus.example.com
@@ -16,10 +22,23 @@ ingress:
     service: http://localhost:80
   - hostname: pocketbase.example.com
     service: http://localhost:80
-  - hostname: appwrite.example.com
-    service: http://localhost:80
   - hostname: payload.example.com
     service: http://localhost:80
   - hostname: next.example.com
     service: http://localhost:80
+  # Appwrite frontend lives on a different prefix because the admin (below)
+  # can't move off appwrite.example.com — _APP_DOMAIN is baked in.
+  - hostname: appwrite-fe.example.com
+    service: http://localhost:80
+
+  # ---- Admin/API subdomains -------------------------------------------------
+  - hostname: strapi-admin.example.com
+    service: http://localhost:80
+  - hostname: directus-admin.example.com
+    service: http://localhost:80
+  - hostname: pocketbase-admin.example.com
+    service: http://localhost:80
+  - hostname: appwrite.example.com           # Appwrite admin stays here
+    service: http://localhost:80
+
   - service: http_status:404

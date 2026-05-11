@@ -1,0 +1,20 @@
+{
+  "name": "cms-demo",
+  "description": "cms-demo theme — minimal Ghost theme exposing /blog. /portfolio and /prenotazioni are deliberately N/A.",
+  "version": "1.0.0",
+  "engines": {
+    "ghost": ">=5.0.0",
+    "ghost-api": "v5"
+  },
+  "license": "MIT",
+  "author": { "name": "cms-demo" },
+  "config": {
+    "posts_per_page": 25,
+    "image_sizes": {
+      "small":  { "width": 320 },
+      "medium": { "width": 640 },
+      "large":  { "width": 1200 }
+    },
+    "card_assets": true
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "projectId": "cms-demo",
+  "projectName": "cms-demo",
+  "settings": {},
+  "databases": [
+    {
+      "$id": "main",
+      "name": "main",
+      "enabled": true
+    }
+  ],
+  "collections": [
+    {
+      "$id": "blog_post",
+      "databaseId": "main",
+      "name": "Blog Post",
+      "enabled": true,
+      "documentSecurity": false,
+      "permissions": ["read(\"any\")"],
+      "attributes": [
+        { "key": "title",        "type": "string",   "size": 255, "required": true,  "array": false },
+        { "key": "slug",         "type": "string",   "size": 255, "required": true,  "array": false },
+        { "key": "excerpt",      "type": "string",   "size": 1000, "required": false, "array": false },
+        { "key": "body",         "type": "string",   "size": 65535, "required": true, "array": false },
+        { "key": "cover_image",  "type": "string",   "size": 255, "required": false, "array": false },
+        { "key": "published_at", "type": "datetime", "required": false, "array": false },
+        { "key": "author",       "type": "string",   "size": 255, "required": false, "array": false }
+      ],
+      "indexes": [
+        { "key": "slug_unique", "type": "unique", "attributes": ["slug"], "orders": ["ASC"] },
+        { "key": "published_at_idx", "type": "key", "attributes": ["published_at"], "orders": ["DESC"] }
+      ]
+    },
+    {
+      "$id": "portfolio_item",
+      "databaseId": "main",
+      "name": "Portfolio Item",
+      "enabled": true,
+      "documentSecurity": false,
+      "permissions": ["read(\"any\")"],
+      "attributes": [
+        { "key": "title",        "type": "string", "size": 255, "required": true,  "array": false },
+        { "key": "slug",         "type": "string", "size": 255, "required": true,  "array": false },
+        { "key": "description",  "type": "string", "size": 65535, "required": true, "array": false },
+        { "key": "images",       "type": "string", "size": 255, "required": false, "array": true },
+        { "key": "external_url", "type": "string", "size": 2000, "required": false, "array": false },
+        { "key": "tags",         "type": "string", "size": 64, "required": false, "array": true }
+      ],
+      "indexes": [
+        { "key": "slug_unique", "type": "unique", "attributes": ["slug"], "orders": ["ASC"] }
+      ]
+    },
+    {
+      "$id": "booking",
+      "databaseId": "main",
+      "name": "Booking",
+      "enabled": true,
+      "documentSecurity": false,
+      "permissions": ["create(\"any\")"],
+      "attributes": [
+        { "key": "name",     "type": "string",   "size": 255, "required": true,  "array": false },
+        { "key": "email",    "type": "string",   "size": 320, "required": true,  "array": false },
+        { "key": "datetime", "type": "datetime", "required": true, "array": false },
+        { "key": "notes",    "type": "string",   "size": 5000, "required": false, "array": false },
+        {
+          "key": "status",
+          "type": "string",
+          "size": 16,
+          "required": true,
+          "array": false,
+          "default": "new",
+          "format": "enum",
+          "elements": ["new", "confirmed", "cancelled"]
+        }
+      ],
+      "indexes": []
+    }
+  ]
+}

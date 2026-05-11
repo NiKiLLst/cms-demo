@@ -1,0 +1,16 @@
+{{!< default}}
+
+<article class="container post">
+    <p><a href="{{@site.url}}/blog/">← Blog</a></p>
+    <h1>{{title}}</h1>
+    <p class="muted">
+        {{date format="DD/MM/YYYY"}}
+        {{#if primary_author}} · {{primary_author.name}}{{/if}}
+    </p>
+    {{#if feature_image}}
+        <img src="{{feature_image}}" alt="" />
+    {{/if}}
+    <div class="post-body">
+        {{content}}
+    </div>
+</article>

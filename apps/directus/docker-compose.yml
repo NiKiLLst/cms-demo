@@ -38,6 +38,18 @@ services:
       timeout: 5s
       retries: 10
 
+  # Sidecar that bootstraps blog_post / portfolio_item / booking collections plus
+  # public-role permissions. Runs to completion and exits; safe to rerun.
+  directus-init:
+    build: ./init
+    environment:
+      DIRECTUS_URL: http://directus:8055
+      ADMIN_EMAIL:  ${ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+    depends_on:
+      - directus
+    restart: "no"
+
 volumes:
   directus_uploads:
   directus_extensions:

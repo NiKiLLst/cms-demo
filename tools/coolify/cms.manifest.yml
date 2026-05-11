@@ -24,13 +24,15 @@ defaults:
 
 cmss:
 
+  # CMS admin — moved off directus.nerdass.org so the public-facing subdomain can
+  # serve the Next.js frontend (resource `directus-frontend` below).
   directus:
     type: dockercompose
-    fqdn: http://directus.nerdass.org
+    fqdn: http://directus-admin.nerdass.org
     docker_compose_location: /docker-compose.yml
     docker_compose_domains:
       directus:
-        domain: http://directus.nerdass.org
+        domain: http://directus-admin.nerdass.org
     env:
       KEY:            "{{secret_pin:KEY|uuid}}"
       SECRET:         "{{secret_pin:SECRET}}"
@@ -39,7 +41,19 @@ cmss:
       DB_DATABASE:    directus
       DB_USER:        directus
       DB_PASSWORD:    "{{secret_pin:DB_PASSWORD}}"
-      PUBLIC_URL:     http://directus.nerdass.org
+      PUBLIC_URL:     http://directus-admin.nerdass.org
+
+  # Public-facing Next.js frontend that reads/writes via Directus REST.
+  directus-frontend:
+    type: dockerfile
+    fqdn: http://directus.nerdass.org
+    dockerfile_location: /Dockerfile
+    ports_exposes: "3000"
+    env:
+      PORT:     "3000"
+      NODE_ENV: production
+      CMS_URL:  http://directus-admin.nerdass.org
+      CMS_NAME: Directus
 
   ghost:
     type: dockercompose
@@ -55,18 +69,33 @@ cmss:
       MYSQL_USER:          ghost
       MYSQL_PASSWORD:      "{{secret_pin:MYSQL_PASSWORD}}"
 
+  # PocketBase admin/API — moved off pocketbase.nerdass.org so that subdomain can
+  # serve the public Next.js frontend (resource `pocketbase-frontend` below).
   pocketbase:
     type: dockercompose
-    fqdn: http://pocketbase.nerdass.org
+    fqdn: http://pocketbase-admin.nerdass.org
     docker_compose_location: /docker-compose.yml
     docker_compose_domains:
       pocketbase:
-        domain: http://pocketbase.nerdass.org
+        domain: http://pocketbase-admin.nerdass.org
     env: {}                      # PocketBase has no compose env
 
+  pocketbase-frontend:
+    type: dockerfile
+    fqdn: http://pocketbase.nerdass.org
+    dockerfile_location: /Dockerfile
+    ports_exposes: "3000"
+    env:
+      PORT:     "3000"
+      NODE_ENV: production
+      CMS_URL:  http://pocketbase-admin.nerdass.org
+      CMS_NAME: PocketBase
+
+  # Strapi admin/API — moved off strapi.nerdass.org so that subdomain can serve
+  # the public Next.js frontend (resource `strapi-frontend` below).
   strapi:
     type: dockerfile
-    fqdn: http://strapi.nerdass.org
+    fqdn: http://strapi-admin.nerdass.org
     dockerfile_location: /Dockerfile
     ports_exposes: "1337"
     env:
@@ -81,6 +110,17 @@ cmss:
       ENCRYPTION_KEY:      "{{secret_pin:ENCRYPTION_KEY}}"
       DATABASE_CLIENT:     sqlite
       DATABASE_FILENAME:   .tmp/data.db
+
+  strapi-frontend:
+    type: dockerfile
+    fqdn: http://strapi.nerdass.org
+    dockerfile_location: /Dockerfile
+    ports_exposes: "3000"
+    env:
+      PORT:     "3000"
+      NODE_ENV: production
+      CMS_URL:  http://strapi-admin.nerdass.org
+      CMS_NAME: Strapi
 
   payloadcms:
     type: dockercompose
@@ -107,6 +147,22 @@ cmss:
     env:
       PORT:     "3000"
       NODE_ENV: production
+
+  # Public-facing Next.js frontend for Appwrite. Lives on a different subdomain
+  # because Appwrite's _APP_DOMAIN is baked into the project config — see
+  # apps/appwrite/README.md.
+  appwrite-frontend:
+    type: dockerfile
+    fqdn: http://appwrite-fe.nerdass.org
+    dockerfile_location: /Dockerfile
+    ports_exposes: "3000"
+    env:
+      PORT:                   "3000"
+      NODE_ENV:               production
+      CMS_URL:                http://appwrite.nerdass.org/v1
+      APPWRITE_PROJECT_ID:    cms-demo
+      APPWRITE_DATABASE_ID:   main
+      CMS_NAME:               Appwrite
 
   appwrite:
     type: service-template
