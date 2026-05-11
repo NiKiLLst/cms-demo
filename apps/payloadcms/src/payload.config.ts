@@ -31,6 +31,10 @@ export default buildConfig({
     pool: {
       connectionString: process.env.DATABASE_URI || '',
     },
+    // Auto-sync schema on boot. For this demo we accept the trade-off: no
+    // migration files to commit, but every config change can rewrite tables.
+    // For a real prod deployment, switch to `payload migrate` workflow.
+    push: true,
   }),
   sharp,
   plugins: [],
