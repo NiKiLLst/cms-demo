@@ -38,7 +38,12 @@ function stripAppendedAttributes(object $model): object
         }
     }
     if ($changed) {
-        $model->setRawAttributes($attrs, $model->exists);
+        // Pass `sync = false` so $original is NOT reset to the current attributes.
+        // Otherwise, calling this after `fill([...'fqdn' => ...])` on an existing
+        // row clears the dirty state — and `save()` silently skips the UPDATE for
+        // fields like fqdn (which is the bug that left renamed admin FQDNs stuck
+        // on their original values in production).
+        $model->setRawAttributes($attrs, false);
     }
     return $model;
 }
