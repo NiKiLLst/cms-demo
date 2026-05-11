@@ -55,6 +55,8 @@ desktop.ini
 # Local credentials sheet (admin pass etc.) — review before committing
 CREDENTIALS.md
 credentials.md
+ACCESS.md
+access.md
 Secrets.txt
 secrets.txt
 SECRETS.txt
